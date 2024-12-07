@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doormat</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset and Basic Styling */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background: #f5f5f5;
+    }
+
+    /* Navigation Bar */
+    nav {
+      background: #333;
+      padding: 10px;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    nav ul li.active a {
+      color: yellow;
+    }
+
+    /* Page Container */
+    .page-container {
+      width: 100%;
+      height: calc(100vh - 50px);
+      position: relative;
+      overflow: hidden;
+    }
+    .tab-content {
+      display: none;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      box-sizing: border-box;
+    }
+
+    /* Modern Landing Page */
+    #home {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(to bottom right, #ff9a9e, #fad0c4);
+      color: #fff;
+      height: 100%;
+      position: relative;
+      padding: 20px;
+      text-align: center;
+    }
+    #home h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+      font-weight: 500;
+    }
+    #home p {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+    #homeCityInput {
+      padding: 15px;
+      width: 300px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      text-align: center;
+      z-index: 9999;
+      position: relative;
+      font-family: 'Roboto', sans-serif;
+    }
+    #homeCityInput:focus {
+      border-color: #fff;
+    }
+    #home button {
+      margin-top: 15px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 1em;
+      background: #fff;
+      border: none;
+      border-radius: 5px;
+      font-weight: 500;
+      color: #333;
+      transition: background 0.3s ease, color 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+    }
+    #home button:hover {
+      background: #333;
+      color: #fff;
+    }
+
+    /* Maps Page */
+    #maps {
+      position: relative;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+    }
+    .map-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+    .apartments-panel {
+      position: absolute; 
+      top: 60px; 
+      right: 0; 
+      bottom: 0; 
+      width: 300px; 
+      background: rgba(255,255,255,0.95); 
+      border-left: 1px solid #ccc; 
+      overflow-y: auto; 
+      padding: 10px;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    /* Saved Apartments & Authentication Pages */
+    #saved {
+      padding: 20px;
+      font-family: 'Roboto', sans-serif;
+    }
+    #saved h2 {
+      font-weight: 500;
+    }
+    #savedApartmentsList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 0;
+      margin: 0;
+    }
+    .saved-apartment-item {
+      list-style: none;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 200px;
+      padding: 10px;
+      box-sizing: border-box;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      font-family: 'Roboto', sans-serif;
+    }
+    .saved-apartment-item img {
+      width: 100%;
+      height: auto;
+      margin-bottom: 8px;
+      border-radius: 3px;
+    }
+
+    /* Authentication Page */
+    #auth {
+      background: #e9ecef;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      font-family: 'Roboto', sans-serif;
+    }
+    .auth-container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: center;
+    }
+    .auth-container h2 {
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    .auth-container input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: 'Roboto', sans-serif;
+    }
+    .auth-container button {
+      width: 100%;
+      background: #007bff;
+      color: #fff;
+      font-weight: 500;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+    }
+    .auth-container button:hover {
+      background: #0056b3;
+    }
+
+    /* Buttons for saving and unsaving */
+    .btn-save {
+      margin-top: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      font-family: 'Roboto', sans-serif;
+      transition: background 0.3s ease;
+      font-size: 0.9em;
+    }
+    .btn-save:hover {
+      background: #218838;
+    }
+
+    .btn-unsave {
+      margin-top: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+      background: #dc3545;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      font-family: 'Roboto', sans-serif;
+      transition: background 0.3s ease;
+      font-size: 0.9em;
+    }
+    .btn-unsave:hover {
+      background: #c82333;
+    }
+
+    /* Error Message Container */
+    #errorMessageContainer {
+      display: none; 
+      background-color: #f8d7da; 
+      color: #721c24; 
+      padding: 10px; 
+      margin: 10px; 
+      border-radius: 5px; 
+      font-weight: bold; 
+      text-align: center;
+      font-family: 'Roboto', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <!-- Error Message Container -->
+  <div id="errorMessageContainer"></div>
+
+  <!-- Navigation Bar -->
+  <nav>
+    <ul>
+      <li class="active"><a href="#home" onclick="showTab('home')">Home</a></li>
+      <li><a href="#maps" onclick="showTab('maps')">Maps</a></li>
+      <li><a href="#saved" onclick="showTab('saved')">Saved Apartments</a></li>
+      <li><a href="#auth" onclick="showTab('auth')">Sign In</a></li>
+    </ul>
+  </nav>
+
+  <!-- Page Container -->
+  <div class="page-container">
+    <!-- Home Page -->
+    <div id="home" class="tab-content">
+      <h1>Welcome to Doormat</h1>
+      <p>Find the perfect apartment in your dream city!</p>
+      <input type="text" id="homeCityInput" placeholder="Type a city..." />
+      <button onclick="searchCity()">Search (Optional)</button>
+    </div>
+
+    <!-- Maps Page -->
+    <div id="maps" class="tab-content">
+      <div class="map-container">
+        <div class="map-search-box" style="position:absolute; top:10px; left:10px; z-index:5;">
+          <input id="pac-input" type="text" placeholder="Search in map..." style="width:200px; padding:5px; border:1px solid #ccc; border-radius:4px;"/>
+        </div>
+        <div id="map"></div>
+        <div class="apartments-panel">
+          <h3>Nearby Apartments</h3>
+          <ul id="apartmentsList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved Apartments Page -->
+    <div id="saved" class="tab-content">
+      <h2>Saved Apartments</h2>
+      <p>Below is a list of apartments you've saved.</p>
+      <ul id="savedApartmentsList"></ul>
+    </div>
+
+    <!-- Authentication Page -->
+    <div id="auth" class="tab-content">
+      <div class="auth-container">
+        <h2>Sign In / Sign Up</h2>
+        <input type="email" id="email" placeholder="Email"/>
+        <input type="password" id="password" placeholder="Password"/>
+        <button onclick="signUpUser()">Sign Up</button>
+        <button onclick="loginUser()">Log In</button>
+        <button onclick="logoutUser()">Log Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include Supabase and Scripts -->
+  <script type="module" src="supabaseClient.js"></script>
+  <script type="module" src="auth.js"></script>
+  <script src="map.js"></script>
+  <script src="main.js"></script>
+
+  <!-- Google Maps & Places API -->
+  <!-- IMPORTANT: Replace "YOUR_API_KEY" with your actual API key -->
+  <!-- Ensure Places API is enabled in your Google Cloud Console -->
+  <script
+    async
+    defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAzp-k4z_v4_zAUbOj_52RyudNdsp__0lc&libraries=places&callback=initMap">
+  </script>
+</body>
+</html>
