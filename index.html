@@ -107,6 +107,16 @@
       color: #fff;
     }
 
+    /* Developer link */
+    #developerLink {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 10px;
+      color: #fff;
+      cursor: pointer;
+    }
+
     /* Maps Page */
     #maps {
       position: relative;
@@ -221,6 +231,53 @@
       background: #0056b3;
     }
 
+    /* Developer Page */
+    #developer {
+      background: #e9ecef;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      font-family: 'Roboto', sans-serif;
+    }
+    .developer-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: left;
+    }
+    .developer-container h2 {
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+    .developer-container input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: 'Roboto', sans-serif;
+    }
+    .developer-container button {
+      width: 100%;
+      background: #28a745;
+      color: #fff;
+      font-weight: 500;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .developer-container button:hover {
+      background: #218838;
+    }
+    .developer-container p {
+      font-size: 0.9em;
+      color: #555;
+    }
+
     /* Buttons for saving and unsaving */
     .btn-save {
       margin-top: 5px;
@@ -290,6 +347,7 @@
       <p>Find the perfect apartment in your dream city!</p>
       <input type="text" id="homeCityInput" placeholder="Type a city..." />
       <button onclick="searchCity()">Search (Optional)</button>
+      <a id="developerLink" href="#developer" onclick="showTab('developer')">developer</a>
     </div>
 
     <!-- Maps Page -->
@@ -324,6 +382,20 @@
         <button onclick="logoutUser()">Log Out</button>
       </div>
     </div>
+
+    <!-- Developer Page -->
+    <div id="developer" class="tab-content">
+      <div class="developer-container">
+        <h2>Developer Rating Configuration</h2>
+        <p>Set each metric (0-25). The total will be shown as "Our Doormat Rating" from 0-100.</p>
+        <input type="number" id="priceMetric" placeholder="Price (0-25)" min="0" max="25"/>
+        <input type="number" id="walkabilityMetric" placeholder="Walkability (0-25)" min="0" max="25"/>
+        <input type="number" id="squareFootMetric" placeholder="Square Foot (0-25)" min="0" max="25"/>
+        <input type="number" id="distanceMetric" placeholder="Distance (0-25)" min="0" max="25"/>
+        <button onclick="updateRatingFormula()">Update Formula</button>
+        <p id="formulaUpdateStatus"></p>
+      </div>
+    </div>
   </div>
 
   <!-- Include Supabase and Scripts -->
@@ -333,8 +405,7 @@
   <script src="main.js"></script>
 
   <!-- Google Maps & Places API -->
-  <!-- IMPORTANT: Replace "YOUR_API_KEY" with your actual API key -->
-  <!-- Ensure Places API is enabled in your Google Cloud Console -->
+  <!-- Replace "YOUR_API_KEY" with your actual API key -->
   <script
     async
     defer

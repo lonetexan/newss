@@ -1,11 +1,19 @@
 // main.js
 
+let globalRatingFormula = {price:0, walkability:0, square_foot:0, distance:0};
+
 function showTab(tabId) {
   const tabs = document.querySelectorAll('.tab-content');
   tabs.forEach(tab => tab.style.display = 'none');
 
   const activeTab = document.getElementById(tabId);
   if (activeTab) {
+    if (tabId === 'developer' && !window.isDeveloper) {
+      alert("You must be the developer to access this page.");
+      document.getElementById('home').style.display = 'block';
+      return;
+    }
+
     activeTab.style.display = 'block';
 
     // Update nav active state
@@ -16,6 +24,10 @@ function showTab(tabId) {
 
     if (tabId === 'saved') {
       displaySavedApartments();
+    }
+
+    if (tabId === 'developer' && window.isDeveloper) {
+      fetchRatingFormula();
     }
   }
 }
@@ -34,8 +46,6 @@ function initHomeAutocomplete() {
   const homeAutocomplete = new google.maps.places.Autocomplete(homeInput, {
     types: ['(cities)'],
     fields: ['geometry', 'name', 'formatted_address']
-    // If you want to restrict to a certain country, uncomment below:
-    // componentRestrictions: { country: 'us' }
   });
 
   homeAutocomplete.addListener('place_changed', () => {
@@ -91,5 +101,74 @@ window.initMap = (function(originalInitMap) {
       originalInitMap();
     }
     initHomeAutocomplete();
+    fetchRatingFormula();
   };
 })(window.initMap || function() {});
+
+async function fetchRatingFormula() {
+  try {
+    const { data, error } = await supabase
+      .from('rating_formula')
+      .select('*')
+      .eq('id', 1)
+      .single();
+
+    if (error) {
+      console.error("Error fetching rating formula:", error);
+      return;
+    }
+
+    if (data) {
+      globalRatingFormula = {
+        price: data.price,
+        walkability: data.walkability,
+        square_foot: data.square_foot,
+        distance: data.distance
+      };
+
+      if (window.isDeveloper) {
+        document.getElementById('priceMetric').value = data.price;
+        document.getElementById('walkabilityMetric').value = data.walkability;
+        document.getElementById('squareFootMetric').value = data.square_foot;
+        document.getElementById('distanceMetric').value = data.distance;
+      }
+    }
+  } catch (err) {
+    console.error("Unexpected error fetching rating formula:", err);
+  }
+}
+
+window.updateRatingFormula = async function() {
+  if (!window.isDeveloper) {
+    alert("You must be a developer to update the formula.");
+    return;
+  }
+  const price = parseInt(document.getElementById('priceMetric').value) || 0;
+  const walkability = parseInt(document.getElementById('walkabilityMetric').value) || 0;
+  const square_foot = parseInt(document.getElementById('squareFootMetric').value) || 0;
+  const distance = parseInt(document.getElementById('distanceMetric').value) || 0;
+
+  // Validate ranges
+  if ([price, walkability, square_foot, distance].some(v => v < 0 || v > 25)) {
+    alert("Each metric must be between 0 and 25.");
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from('rating_formula')
+      .update({ price, walkability, square_foot, distance })
+      .eq('id', 1);
+
+    if (error) {
+      console.error("Error updating rating formula:", error);
+      document.getElementById('formulaUpdateStatus').textContent = "Error updating formula.";
+    } else {
+      document.getElementById('formulaUpdateStatus').textContent = "Formula updated successfully!";
+      globalRatingFormula = {price, walkability, square_foot, distance};
+    }
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    document.getElementById('formulaUpdateStatus').textContent = "Unexpected error updating formula.";
+  }
+}

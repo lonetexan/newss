@@ -50,7 +50,6 @@ window.initMap = function() {
   maybeSearch();
 };
 
-// Function to recenter map, called from main.js
 window.recenterMap = function(lat, lng) {
   if (!map) {
     console.error("Map not initialized yet.");
@@ -147,10 +146,12 @@ function addApartmentMarker(details) {
   markers.push(marker);
 
   marker.addListener('click', () => {
+    const rating = calculateGlobalRating();
     let contentString = `
       <div style="color:#000;">
         <h2>${details.name}</h2>
         <p><strong>Address:</strong> ${details.vicinity || 'N/A'}</p>
+        <p><strong>Our Doormat Rating:</strong> ${rating}/100</p>
     `;
 
     if (details.website) {
@@ -207,11 +208,14 @@ async function addApartmentToList(details) {
     websiteHtml = `<a href="${details.website}" target="_blank">Visit Website</a><br>`;
   }
 
+  const rating = calculateGlobalRating();
   li.innerHTML = `
     <strong>${details.name}</strong><br>
     ${details.vicinity || 'Address not available'}<br>
     ${photoHtml}
     ${websiteHtml}
+    <strong>Our Doormat Rating:</strong> ${rating}/100
+    <br>
   `;
 
   if (window.currentUser) {
@@ -224,8 +228,7 @@ async function addApartmentToList(details) {
         name: details.name,
         vicinity: details.vicinity,
         website: details.website || '',
-        photo_url: photoUrl,
-        rating: 0
+        photo_url: photoUrl
       });
     });
     li.appendChild(saveBtn);
@@ -269,8 +272,7 @@ async function saveApartmentToSupabase(apartment) {
         name: apartment.name,
         vicinity: apartment.vicinity,
         website: apartment.website,
-        photo_url: apartment.photo_url,
-        rating: apartment.rating
+        photo_url: apartment.photo_url
       }, { onConflict: 'user_id,place_id' });
 
     if (error) {
@@ -331,49 +333,16 @@ async function displaySavedApartments() {
         websiteHtml = `<a href="${apartment.website}" target="_blank">Visit Website</a><br>`;
       }
 
+      const rating = calculateGlobalRating();
+
       li.innerHTML = `
         <strong>${apartment.name}</strong><br>
         ${apartment.vicinity || 'Address not available'}<br>
         ${photoHtml}
         ${websiteHtml}
+        <strong>Our Doormat Rating:</strong> ${rating}/100
+        <br>
       `;
-
-      // Rating Section
-      const ratingContainer = document.createElement('div');
-      ratingContainer.style.margin = '10px 0';
-      ratingContainer.style.display = 'flex';
-      ratingContainer.style.alignItems = 'center';
-
-      const ratingLabel = document.createElement('span');
-      ratingLabel.textContent = 'Rating: ';
-      ratingContainer.appendChild(ratingLabel);
-
-      for (let i = 1; i <= 5; i++) {
-        const star = document.createElement('span');
-        star.innerText = '★';
-        star.style.cursor = 'pointer';
-        star.style.fontSize = '20px';
-        star.style.marginRight = '5px';
-        star.style.color = i <= (apartment.rating || 0) ? 'gold' : '#ccc';
-
-        star.addEventListener('mouseover', () => {
-          highlightStars(ratingContainer, i);
-        });
-
-        star.addEventListener('mouseout', () => {
-          highlightStars(ratingContainer, apartment.rating || 0);
-        });
-
-        star.addEventListener('click', () => {
-          updateApartmentRatingInSupabase(apartment.place_id, i);
-          apartment.rating = i;
-          highlightStars(ratingContainer, i);
-        });
-
-        ratingContainer.appendChild(star);
-      }
-
-      li.appendChild(ratingContainer);
 
       // Unsave Button
       const unsaveBtn = document.createElement('button');
@@ -387,32 +356,6 @@ async function displaySavedApartments() {
   } catch (err) {
     console.error("Unexpected error:", err);
     showError("An unexpected error occurred while fetching saved apartments.");
-  }
-}
-
-// Update Apartment Rating in Supabase
-async function updateApartmentRatingInSupabase(place_id, rating) {
-  if (!window.currentUser) {
-    showError("You must be logged in to rate apartments.");
-    return;
-  }
-
-  try {
-    const { error } = await supabase
-      .from('saved_apartments')
-      .update({ rating })
-      .eq('user_id', window.currentUser.id)
-      .eq('place_id', place_id);
-
-    if (error) {
-      console.error("Error updating rating:", error);
-      showError("Error updating rating: " + error.message);
-    } else {
-      showError("Rating updated successfully!");
-    }
-  } catch (err) {
-    console.error("Unexpected error:", err);
-    showError("An unexpected error occurred while updating the rating.");
   }
 }
 
@@ -443,12 +386,8 @@ async function unsaveApartmentFromSupabase(place_id) {
   }
 }
 
-// Highlight Stars Based on Rating
-function highlightStars(container, rating) {
-  const stars = container.querySelectorAll('span');
-  stars.forEach((star, index) => {
-    // first child is label "Rating: ", skip that
-    if (index === 0) return; 
-    star.style.color = index <= rating ? 'gold' : '#ccc';
-  });
+function calculateGlobalRating() {
+  // globalRatingFormula is defined in main.js and fetched from supabase
+  const { price, walkability, square_foot, distance } = globalRatingFormula;
+  return price + walkability + square_foot + distance;
 }
